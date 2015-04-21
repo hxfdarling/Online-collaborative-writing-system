@@ -1,0 +1,38 @@
+
+.content .center {
+    border: none;
+}
+
+.content .info {
+    border-radius: 5px 5px;
+    height: 100%;
+}
+
+.content .left.info {
+    float: left;
+    width: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.content .right.info {
+    width: 260px;
+    float: right;
+    overflow: hidden;
+
+}
+
+#chartRight {
+    overflow: hidden;
+    overflow-y: auto;
+    height: 100%;
+}
+
+#zzd_title {
+    display: none;
+    text-align: center;
+    width: 100%;
+    font-size: 18px;
+    color: #666;
+    font-family: 'Trebuchet MS', Arial, Helvetica, sans-serif;
+}

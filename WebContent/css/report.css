@@ -1,0 +1,9 @@
+.contribute {
+    display: inline-block;
+    height: 200px;
+}
+
+div.content {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}

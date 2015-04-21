@@ -1,0 +1,48 @@
+.list {
+	border-radius: 5px;
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid gray;
+}
+
+.list td {
+	border: 1px solid gray;
+}
+
+.list tr {
+	border-radius: 5px;
+	border: 1px solid gray;
+	color: #2e2e2e;
+	height: 26px;
+	text-align: center;
+	cursor: default;
+}
+
+.list .table-header {
+	background-color: #9C7BCD;
+	color: #ffffff;
+	text-align: center;
+	height: 30px;
+	font-size: 16px;
+}
+
+.list .table-header:hover {
+	background-color: #B36BF5;
+}
+
+.list tr.even {
+	background-color: #ffffff;
+}
+
+.list tr.odd {
+	background-color: #d9d9d9;
+}
+
+.list tr:hover {
+	background-color: rgba(179, 107, 245, 0.45);
+}
+
+.list tr.selected {
+	background-color: #B36BF5;
+	color: #ffffff;
+}

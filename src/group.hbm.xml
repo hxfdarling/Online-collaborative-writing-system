@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.pad.entity">
+	<class name="Group" table="t_group">
+		<id name="groupId" column="groupId">
+			<generator class="uuid"></generator>
+		</id>
+		<property name="name"></property>
+		<property name="createTime"></property>
+		<property name="status"></property>
+		<property name="createUesrName"></property>
+		<many-to-one name="createUser" column="create_user_id"
+			class="com.pad.entity.User" lazy="false"></many-to-one>
+		<set name="users" table="t_user_group" lazy="false" inverse="false">
+			<key column="groupId"></key>
+			<many-to-many class="com.pad.entity.User" column="authorId">
+			</many-to-many>
+		</set>
+	</class>
+</hibernate-mapping>

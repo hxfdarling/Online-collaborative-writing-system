@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.pad.entity">
+	<class name="Pad" table="t_pad">
+		<id name="pid">
+			<generator class="uuid"></generator>
+		</id>
+		<property name="gid"></property>
+		<property name="gname"></property>
+		<property name="pname"></property>
+		<property name="status"></property>
+		<property name="timeValue"></property>
+		<property name="wordValue"></property>
+		<property name="lastUpdate"></property>
+	</class>
+</hibernate-mapping>

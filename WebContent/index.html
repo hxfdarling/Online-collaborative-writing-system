@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>欢迎来到在线协同写作系统</title>
+    <link rel="shortcut icon" href="img/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="css/formValidate.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <script src="js/seajs/sea.js" type="text/javascript"></script>
+    <script src="js/config/config-seajs.js" type="text/javascript"></script>
+    <style>
+        .js_item {
+            float: left;
+            width: 350px;
+            margin: 20px;
+        }
+
+        .js_item h2 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body style="overflow: hidden;">
+<div class="head theme-background-color">
+    <div class="headName">在线协同写作系统</div>
+    <div class="nav">
+        <a href="#" class="nav_item" id="nav_login">登陆</a> <a href="#"
+                                                              class="nav_item" id="nav_register">注册</a> <a
+            href="help.html"
+            class="nav_item" target="help_window">帮助</a> <a href="about.html"
+                                                            class="nav_item" target="about_window">关于</a>
+    </div>
+</div>
+<div class="content" style="overflow-y: auto">
+    <div class="js_item">
+        <h2>简介</h2>
+
+        <p class='about-content'>
+            本平台使得多人可以在该平台支持下，互相激励、共同促进、高效高质、互不冲突的共同完成一篇文稿，
+            并且在写作的过程中会产生不同的图表，这些图标动态更新，以此反映参与者在写作中的状态，对创作的贡献程度，集中程度，并以此激励参与者相互促进写作，提高写作效率、写作质量。
+            该平台不同于其他协同写作平台，其他写作平台主要专注于实现协同写作，但该平台更进一步通过实时的可视化数据促进协同写作.</p>
+    </div>
+    <div class="js_item">
+        <h2>功能</h2>
+
+        <p class='about-content'>
+            1.支持多人协同创作，互不冲突。<br> 2.支持文本颜色标记，不同参与者输入文本的颜色不同<br>
+            3.支持实时的可视化数据展示<br> 4.实时的参与专注度计算<br> 5.实时的贡献计算<br>
+            6.实时的行为显示<br> .....<br>
+        </p>
+        <img src="img/bg.png" style="width: 200px;"/>
+
+    </div>
+    <div class="js_item">
+        <h2>如何使用</h2>
+
+        <p class='about-content'>
+            注册后直接登录平台，在组、文章及成员管理界面创建组并创建文章，可以将注册该平台的其他成员加入组，所有在同一组中的成员都可以编辑改组下面的所有文章。选择想要编辑的文章点击“编辑”即可进入编辑状态.</p>
+    </div>
+
+
+</div>
+<div class="footer theme-background-color"></div>
+<div class="login-panel">
+    <div
+            style="padding: 0 10% 0 10%; width: 80%; height: 26px; color: #ffffff"
+            class="theme-background-color">
+        <span>登录</span>
+
+        <div
+                style="float: right; width: 25px; height: 100%; cursor: pointer; font-size: 10px; line-height: 26px; color: red;"
+                id="login_close">关闭
+        </div>
+    </div>
+    <form class="form_login">
+        <div class="form-item">
+            <label>账户</label> <input type="text" name="user.username"
+                                     validate="required,email">
+        </div>
+        <div class="form-item">
+            <label>密码</label> <input type="password" name="user.password"
+                                     id="password" validate="required,minLength:6">
+        </div>
+        <div class="form-item">
+            <a class="btn theme-background-color theme-color"
+               style="margin-left: 80px;" id="btn_go_login">登陆</a>
+        </div>
+    </form>
+</div>
+<div class="register-panel">
+    <div
+            style="padding: 0 10% 0 10%; width: 80%; height: 26px; color: #ffffff"
+            class="theme-background-color">
+        <span>注册</span>
+
+        <div
+                style="float: right; width: 25px; height: 100%; cursor: pointer; font-size: 10px; line-height: 26px; color: red;"
+                id="register_close">关闭
+        </div>
+    </div>
+    <form class="form_register" action="register.action" method="post">
+        <div style="color: gray; font-size: 12px; padding: 5px;">注意：邮箱(账号)格式请以@pad.com结尾！支持英文字母数字，推荐使用姓名拼音！</div>
+        <div class="form-item">
+            <label>邮箱:</label><input type="text" name="user.username" id="email"
+                                     validate="required,email,ajax:check?operation=email"
+                                     message="邮箱可用,邮箱已经注册"/>
+        </div>
+        <div class="form-item">
+            <label>姓名:</label><input type="text" name="user.name" id="name"
+                                     validate="required">
+        </div>
+        <div class="form-item">
+            <label>密码:</label><input type="password" name="user.password"
+                                     id="password_register" validate="required,minLength:6"/>
+        </div>
+        <div class="form-item">
+            <label>验证码:</label><input type="text" name="snCode"
+                                      validate="required,ajax:check?operation=checksn"
+                                      message="验证码正确,验证码输入错误" style="width: 35px;"><img
+                id="imgSn" alt="pic code"
+                style="margin-left: 5px; vertical-align: top; height: 26px; width: 76px;"
+                onclick="fnChangeSn()"/>
+        </div>
+        <DIV class="form-item">
+            <a class="btn theme-background-color theme-color"
+               style="margin-left: 80px;" id="register_submit">注册</a>
+        </DIV>
+    </form>
+</div>
+<!-- 弹出框的虚化层 -->
+<div
+        style="background-color: black; opacity: 0.4; position: absolute; z-index: 1000; visibility: hidden; width: 10000px; height: 10000px; left: 0px; top: 0px;"
+        class="gray_panel"></div>
+<script>
+    // 换验证码图片
+    function fnChangeSn() {
+        console.log("正在获取验证图片");
+        var sn = document.getElementById("imgSn");
+        sn.src = "sn.jpg?r=" + Math.random();
+    }
+    seajs.use([ "util/formValidate", "jquery" , "util/util"], function (fv, $) {
+        window.onload = window.onresize = function () {
+            var height = (window.innerHeight || document.body.clientHeight)
+                    - $(".head").height()
+                    - $(".footer").height() - 20;
+            var content = $(".content");
+            content.css({
+                "height": height
+            });
+        };
+        window.name = "home_window";
+        $(function () {
+            $.getSystemInfo(function (si) {
+                $(".footer").text(si.copyright || "");
+            });
+
+            $(".form_login").validForm();
+            $(".form_register").validForm();
+            //打开注册界面
+            $("#nav_register").click(function () {
+                var $rp = $(".register-panel");
+                fnChangeSn();
+                var _width = window.scrollX
+                        || document.body.scrollLeft
+                        + (window.innerWidth || document.body.clientWidth)
+                        / 2 - $rp.width()
+                        / 2;
+                var _height = window.scrollY
+                        || document.body.scrollTop
+                        + (window.innerHeight || document.body.clientHeight)
+                        / 2
+                        - $rp.height()
+                        / 2;
+                $rp.css({
+                    "left": _width,
+                    "top": _height
+                });
+                show();
+                $rp.fadeIn();
+            });
+            //关闭注册界面按钮
+            $("#register_close").click(function () {
+                var $rp = $(".register-panel");
+                $rp.fadeOut();
+                hidden();
+            });
+            //打开登录界面
+            $("#nav_login").click(function () {
+                var $rp = $(".login-panel");
+                fnChangeSn();
+                var _width = window.scrollX
+                        || document.body.scrollLeft
+                        + (window.innerWidth || document.body.clientWidth)
+                        / 2 - $rp.width()
+                        / 2;
+                var _height = window.scrollY
+                        || document.body.scrollTop
+                        + (window.innerHeight || document.body.clientHeight)
+                        / 2
+                        - $rp.height()
+                        / 2;
+                $rp.css({
+                    "left": _width,
+                    "top": _height
+                });
+                show();
+                $rp.fadeIn();
+            });
+            //关闭登录界面
+            $("#login_close").click(function () {
+                var $rp = $(".login-panel");
+                $rp.fadeOut();
+                hidden();
+            });
+            function login_fn() {
+                var form_login = $(".form_login");
+                if (form_login.validForm("submit")) {
+                    var data = form_login.serialize();
+                    $.ajax({
+                        url: "login",
+                        type: 'post',
+                        dataType: "json",
+                        data: data,
+                        complete: function (xhr) {
+                            if (xhr.status == 200) {
+                                var json = JSON
+                                        .parse(xhr.responseText);
+                                if (json.message == "ok") {
+                                    window.location.href = json.url;
+                                } else {
+                                    alert("账号或密码错误");
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    alert("信息没有填写完整");
+                }
+            }
+
+            $(".login-panel").on("keypress", function (e) {
+                if (e.charCode == 13) {
+                    login_fn();
+                }
+            });
+
+            //登录按钮
+            $("#btn_go_login").click(function () {
+                login_fn();
+            });
+            //提交注册信息
+            $("#register_submit").click(function () {
+                var form_register = $(".form_register");
+                if (form_register.validForm("submit")) {
+                    var data = form_register.serialize();
+                    form_register.submit();
+                    console.log(data);
+                } else {
+                    alert("信息没有填写完整");
+                }
+            });
+            function show() {
+                var gray_panel = $(".gray_panel");
+                gray_panel.css({
+                    "visibility": "visible"
+                });
+            }
+
+            function hidden() {
+                var gray_panel = $(".gray_panel");
+                gray_panel.css({
+                    "visibility": "hidden"
+                });
+            }
+        })
+    });
+</script>
+</body>
+</html>

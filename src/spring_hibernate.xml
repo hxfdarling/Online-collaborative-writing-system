@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<bean id="myds" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://localhost:3306/pad_for_real_data?characterEncoding=UTF-8" />
+		<property name="username" value="root" />
+		<property name="password" value="" />
+	</bean>
+	<bean id="mysf"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="myds" />
+		<property name="mappingResources">
+			<list>
+				<value>user.hbm.xml</value>
+				<value>group.hbm.xml</value>
+				<value>pad.hbm.xml</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<value>
+				hibernate.dialect =org.hibernate.dialect.MySQLDialect
+				hibernate.show_sql=true
+				hibernate.hbm2ddl.auto=update
+			</value>
+		</property>
+	</bean>
+	<!-- 事务加在dao 为了测试 -->
+	<bean id="myTxManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="mysf" />
+	</bean>
+
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="productServiceMethods" expression="execution(* com.pad.service.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="productServiceMethods" />
+	</aop:config>
+
+	<tx:advice id="txAdvice" transaction-manager="myTxManager">
+		<tx:attributes>
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="merge*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<!-- <tx:method name="find*" propagation="REQUIRED" /> -->
+			<tx:method name="join*" propagation="REQUIRED" />
+			<tx:method name="*" propagation="SUPPORTS" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- spring系统启动以后，加载该类，查询所有数据 -->
+	<bean class="com.pad.util.InitListener">
+		<property name="userServiceImpl" ref="userServiceImpl"></property>
+	</bean>
+	<bean id="check" class="com.pad.filter.CheckFilter">
+		<property name="userServiceImpl" ref="userServiceImpl"></property>
+	</bean>
+	<bean id="imageCodeFilter" class="com.pad.filter.ImageCodeFilter">
+	</bean>
+</beans>

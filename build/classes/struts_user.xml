@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+	<package name="pad" namespace="/" extends="struts-default">
+		<default-action-ref name="index" />
+		<action name="index">
+			<result>/index.html</result>
+		</action>
+		<action name="register" class="userAction" method="register">
+			<result>/index.html</result>
+		</action>
+		<action name="login" class="userAction" method="login">
+		</action>
+		<action name="getInfo" class="userAction" method="getInfo">
+		</action>
+		<action name="getUsers" class="groupAction" method="getUsers">
+		</action>
+		<action name="getGroups" class="groupAction" method="getGroups">
+		</action>
+		<action name="createGroup" class="groupAction" method="createGroup">
+		</action>
+		<action name="addUserToGroup" class="groupAction" method="addUserToGroup">
+		</action>
+		<action name="removeUserFromGroup" class="groupAction" method="removeUserFromGroup">
+		</action>
+		<action name="checkUserIsCreater" class="groupAction" method="checkUserIsCreater">
+		</action>
+		<action name="updateGroupName" class="groupAction" method="updateGroupName"></action>
+		<action name="deleteGroup" class="groupAction" method="deleteGroup"></action>
+		<action name="getSystemInfo" class="userAction" method="getSystemInfo"></action>
+		<action name="updatePadAndGroupValue" class="padAction"
+			method="updatePadAndGroupValue"></action>
+	</package>
+
+
+</struts>

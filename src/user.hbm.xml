@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.pad.entity">
+	<class name="User" table="t_user">
+		<id name="authorId" column="authorId">
+			<generator class="uuid"></generator>
+		</id>
+		<property name="username" unique="true" />
+		<property name="password" />
+		<property name="registtime" />
+		<property name="authority" />
+		<property name="name" />
+		<set name="groups" table="t_user_group" lazy="false" inverse="true">
+			<key column="authorId"></key>
+			<many-to-many class="com.pad.entity.Group" column="groupId">
+			</many-to-many>
+		</set>
+	</class>
+</hibernate-mapping>

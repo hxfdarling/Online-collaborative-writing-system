@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<constant name="struts.objectFactory" value="spring" />
+	<constant name="struts.multipart.saveDir" value="/tmp"></constant>
+	<constant name="struts.multipart.maxSize" value="90000000" />
+	<constant name="struts.i18n.encoding" value="UTF-8" />
+	<constant name="debug" value="false" />
+	<include file="struts_user.xml"></include>
+</struts>

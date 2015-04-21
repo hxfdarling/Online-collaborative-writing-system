@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/aop 
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- entity -->
+	<bean id="user" class="com.pad.entity.User" scope="prototype"></bean>
+	<bean id="group" class="com.pad.entity.Group" scope="prototype"></bean>
+	<bean id="pad" class="com.pad.entity.Pad" scope="prototype"></bean>
+
+	<!-- dao -->
+	<bean id="userDaoImpl" class="com.pad.dao.impl.UserDaoImpl" scope="prototype">
+		<property name="sessionFactory" ref="mysf"></property>
+	</bean>
+	<bean id="groupDaoImpl" class="com.pad.dao.impl.GroupDaoImpl"
+		scope="prototype">
+		<property name="sessionFactory" ref="mysf"></property>
+	</bean>
+	<bean id="padDaoImpl" class="com.pad.dao.impl.PadDaoImpl" scope="prototype">
+		<property name="sessionFactory" ref="mysf"></property>
+	</bean>
+
+	<!-- service -->
+	<bean id="baseServiceImpl" class="com.pad.service.impl.BaseServiceImpl"
+		scope="prototype">
+	</bean>
+
+	<bean id="userServiceImpl" class="com.pad.service.impl.UserServiceImpl"
+		scope="prototype">
+		<property name="userDao" ref="userDaoImpl" />
+	</bean>
+
+	<bean id="groupServiceImpl" class="com.pad.service.impl.GroupServiceImpl"
+		scope="prototype">
+		<property name="groupDao" ref="groupDaoImpl" />
+	</bean>
+	<bean id="padServiceImpl" class="com.pad.service.impl.PadServiceImpl"
+		scope="prototype">
+		<property name="padDao" ref="padDaoImpl" />
+	</bean>
+
+	<!-- action -->
+	<bean id="userAction" class="com.pad.action.UserAction" scope="prototype">
+		<property name="userService" ref="userServiceImpl" />
+		<property name="user" ref="user"></property>
+	</bean>
+	<bean id="groupAction" class="com.pad.action.GroupAction" scope="prototype">
+		<property name="groupService" ref="groupServiceImpl" />
+		<property name="userService" ref="userServiceImpl" />
+		<property name="group" ref="group" />
+		<property name="user" ref="user" />
+	</bean>
+	<bean id="padAction" class="com.pad.action.PadAction" scope="prototype">
+		<property name="userService" ref="userServiceImpl" />
+		<property name="padService" ref="padServiceImpl" />
+		<property name="pad" ref="pad"></property>
+	</bean>
+
+</beans>

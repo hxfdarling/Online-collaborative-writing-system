@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>报表---在线协同写作系统</title>
+ <link rel="shortcut icon" href="img/favicon.ico" />
+    <link rel="stylesheet" href="css/jquery.jqplot.css" type="text/css">
+
+    <link type="text/css" rel="stylesheet" href="css/formValidate.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <link type="text/css" rel="stylesheet" href="css/list.css">
+    <link type="text/css" rel="stylesheet" href="css/util.css">
+    <link type="text/css" rel="stylesheet" href="css/report.css">
+    <link type="text/css" rel="stylesheet" href="css/chat.css">
+    <script src="js/seajs/sea.js" type="text/javascript"></script>
+    <script src="js/config/config-seajs.js" type="text/javascript"></script>
+</head>
+<body style="overflow:hidden;">
+<div class="head theme-background-color">
+    <div class="headName small_head_name"></div>
+    <div class="nav">
+        <a class="nav_item" href="index.html" target="home_window">主页</a>
+        <a class="nav_item" id="edit_pad">编辑文章</a>
+        <a class="nav_item" id="change_pad">选择文章</a>
+        <a class="nav_item" href="help.html" target="help_window">帮助</a>
+        <a class="nav_item" href="about.html" target="about_window">关于</a>
+    </div>
+</div>
+<div class="content">
+    <!--贡献值-->
+    <!--<div id="versionsC" class="contribute"></div>-->
+    <div id="textC" class="contribute"></div>
+    <div id="timeC" class="contribute"></div>
+    <!--行为图-->
+    <div id="action" style="width: 100%;"></div>
+    <div id="actionTB" style="visibility: hidden">
+        <div class="action-item add"></div>
+        <label>添加操作</label>
+
+        <div class="action-item replace"></div>
+        <label>替换操作</label>
+
+        <div class="action-item remove"></div>
+        <label>删除操作</label>
+    </div>
+    <!--行为图上面的悬浮信息块-->
+    <div id="tooltip1b"></div>
+    <div id="focus"></div>
+</div>
+<div class="footer theme-background-color"></div>
+<script>
+    seajs.use([ "util/formValidate", "jquery", "util/list", "util/util", "pad", "handler" ], function (fv, $, list, util, pad, handler) {
+        /***
+         * 自动调整界面大小
+         * @type {onresize}
+         */
+        window.onload = window.onresize = function () {
+            var head = $(".head"), footer = $(".footer"),
+                    h = (window.innerHeight || document.body.clientHeight) - head.height() - footer.height() - 20;
+            var content = $(".content");
+            content.css({
+                "height": h
+            });
+        };
+
+        $(function () {
+            $.getSystemInfo(function (si) {
+                $(".footer").text(si.copyright || "");
+            });
+            $("#edit_pad").click(function () {
+                window.edit = window.opener.edit;
+                window.open("edit.html", "edit_window")
+            });
+            $("#change_pad").click(function () {
+                window.edit = window.opener.edit;
+                window.open("pad.html", "pad_window");
+            });
+
+            $.user = window.opener.edit.user;
+            var padName = window.opener.edit.name;
+            $(".headName").text("“" + padName + "”文章的报表");
+            if ($.user.authority == 1) {
+                $("#edit_pad").text("查看文章");
+            }
+            pad.createAuthorIfNotExistsFor($.user.name, $.user.authorId, function () {
+                $.user.innerAuthorId = this.data.authorID;
+                pad.createSession(window.opener.edit.groupID, this.data.authorID, function () {
+                    var pid, i;
+                    pid = window.opener.edit.groupID + "$" + window.opener.edit.name;
+                    if (this.message == "ok") {
+                        $.session = this.data;
+                        pad.setCookie("sessionID", this.data.sessionID, function () {
+                            function fn2() {
+                                if ($.cUsers) {
+                                    pad.getAllVersions(pid, function () {
+                                        var _versions = this.data.version;
+//                                        handler.addContributionByVersions("versionsC", _versions, $.cUsers);
+                                        handler.addContributionByTime("timeC", _versions, $.cUsers);
+                                        handler.addContributionByText("textC", _versions, $.cUsers);
+                                        //这里计算行为图
+                                        handler.action({users: $.cUsers, versions: _versions}, "action", "tooltip1b");
+
+//                                        setTimeout(fn2, 120000);
+                                    })
+                                } else {
+                                    pad.listAuthorsObjOfPad(pid, function () {
+                                        $.cUsers = this.data;
+                                        pad.getAllVersions(pid, function () {
+                                            var _versions = this.data.version;
+//                                            handler.addContributionByVersions("versionsC", _versions, $.cUsers);
+                                            handler.addContributionByTime("timeC", _versions, $.cUsers);
+                                            handler.addContributionByText("textC", _versions, $.cUsers);
+
+                                            //这里计算行为图
+                                            handler.action({users: $.cUsers, versions: _versions}, "action", "tooltip1b");
+                                            $("#actionTB").css({"visibility": "visible"});
+
+                                            //专注图折线图
+//                                            handler.report_focus($.cUsers, _versions, "focus");
+
+//                                            setTimeout(fn2, 120000);
+                                        });
+                                    })
+                                }
+                            }
+
+                            fn2();//启动贡献值查询
+                        });
+                    } else {
+                        alert("session 创建失败");
+                    }
+                });
+            });
+        });
+    });
+</script>
+</body>
+
+</html>

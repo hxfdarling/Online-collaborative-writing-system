@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>编辑---在线协同写作系统</title>
+    <link rel="shortcut icon" href="img/favicon.ico" />
+    <link rel="stylesheet" href="css/jquery.jqplot.css" type="text/css">
+
+    <link type="text/css" rel="stylesheet" href="css/formValidate.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <link type="text/css" rel="stylesheet" href="css/list.css">
+    <link type="text/css" rel="stylesheet" href="css/util.css">
+    <link type="text/css" rel="stylesheet" href="css/edit.css">
+    <link type="text/css" rel="stylesheet" href="css/chat.css">
+    <script src="js/seajs/sea.js" type="text/javascript"></script>
+    <script src="js/config/config-seajs.js" type="text/javascript"></script>
+    <style>
+
+    </style>
+</head>
+<body style="overflow: hidden;">
+<div class="head theme-background-color">
+    <div class="headName small_head_name"></div>
+    <div class="nav">
+        <a class="nav_item" href="index.html" target="home_window">主页</a>
+        <a class="nav_item" id="get_report">报表</a>
+        <a class="nav_item" id="change_pad">选择文章</a>
+        <a class="nav_item" href="help.html" target="help_window">帮助</a>
+        <a class="nav_item" href="about.html" target="about_window">关于</a>
+        <span class="username"></span>
+    </div>
+</div>
+<div class="content">
+    <div class="left info">
+        <div id="chartRight">
+            <div id="zzd_title">
+                参与者的专注度
+            </div>
+        </div>
+    </div>
+    <div class="right info">
+        <div id="pad_orders"></div>
+        <div id="pad_orders2"></div>
+    </div>
+    <div class="center">
+        <iframe id="editor" style="border: 1px solid #ddd;"></iframe>
+    </div>
+
+</div>
+<div class="footer theme-background-color"></div>
+<script>
+    seajs.use([ "util/formValidate", "jquery", "util/list", "util/util", "pad", "handler" ], function (fv, $, list, util, pad, handler) {
+        /***
+         * 自动调整界面大小
+         * @type {onresize}
+         */
+        window.onload = window.onresize = function () {
+            var height = (window.innerHeight || document.body.clientHeight)
+                    - $(".head").height()
+                    - $(".footer").height() - 20;
+            var w = (window.innerWidth || document.body.clientwidth);
+            var content = $(".content");
+            content.css({
+                "height": height,
+                "width": w - 20
+            });
+            var _height = content.height();
+            var _width = content.width() - 540;
+            var editor = $("#editor").css({
+                "height": _height,
+                "width": _width
+            });
+            var group = window.opener.edit.group;
+            if (!(group && group.status != "1")) {
+                $(".right").hide();
+                $(".left").hide();
+                editor.css({
+                    "width": "100%"
+                })
+            } else {
+                console.log(_width);
+                if (_width >= 0 && _width < 360) {
+                    editor.css({
+                        "width": _width + 260
+                    });
+                    $(".right").fadeOut();
+                    $(".left").fadeIn();
+
+                } else if (_width >= 350) {
+                    editor.css({
+                        "width": _width
+                    });
+                    $(".right").fadeIn();
+                    $(".left").fadeIn();
+                } else {
+                    editor.css({
+                        "width": "100%"
+                    });
+                    $(".right").fadeOut();
+                    $(".left").fadeOut();
+
+                }
+            }
+        };
+
+        $(function () {
+            $.getSystemInfo(function (si) {
+                $(".footer").text(si.copyright || "");
+            });
+            (function () {
+                $("#change_pad").click(function () {
+                    window.edit = window.opener.edit;
+                    window.open("pad.html", "pad_window");
+                });
+
+                $("#get_report").click(function () {
+                    window.edit = window.opener.edit;
+                    window.open("report.html", "report_window");
+                });
+            })();
+
+            $("body").on("load", function () {
+                $(".username").text("当前用户:" + $.user.name);
+                var padName = window.opener.edit.name;
+                if ($.user.authority == 1) {
+                    $(".headName").text("正在查看“" + padName + '”文章');
+                } else {
+                    $(".headName").text("正在编辑“" + padName + '”文章');
+                }
+                if (!window.opener.edit) {
+                } else {
+                    pad.createAuthorIfNotExistsFor($.user.name, $.user.authorId, function () {
+                        $.user.innerAuthorId = this.data.authorID;
+                        pad.createSession(window.opener.edit.groupID, this.data.authorID, function () {
+                            var editor, userName, pid, temp, i , group, src;
+                            pid = window.opener.edit.groupID + "$" + window.opener.edit.name;
+                            group = window.opener.edit.group;
+                            userName = $.user.name;
+
+                            function setCookie() {
+                                pad.setCookie("sessionID", $.session.sessionID, function () {
+                                    editor = $("#editor");
+                                    editor.attr("src", src);
+                                    if (group && group.status != "1") {
+                                        editor.on("load", function () {
+                                            function fn2() {
+                                                if ($.cUsers && $.cUsers.length) {
+                                                    pad.getAllVersions(pid, function () {
+                                                        var _versions = this.data.version;
+                                                        //在这里拉取数据
+                                                        handler.getPadsWordAndTimeValue("pad_orders","pad_orders2", _versions, $.cUsers, group.id, group.name, window.opener.edit.name);
+                                                        setTimeout(fn2, 1 * 60 * 1000);
+                                                    });
+                                                } else {
+                                                    setTimeout(fn2, 1000);
+                                                }
+                                            }
+
+                                            function fn4() {
+                                                if ($.cUsers && $.cUsers.length) {
+                                                    pad.getLastVersionsByUser(pid, $.cUsers, function () {
+                                                        var _versions = this.data.version;
+                                                        handler.addAllFocusChart2($("#chartRight"), _versions);
+                                                        $("#zzd_title").css({"display": "block"});
+                                                        setTimeout(fn4, 5000);
+                                                    });
+                                                } else {
+                                                    setTimeout(fn4, 1000);
+                                                }
+                                            }
+
+                                            function fn3() {
+                                                pad.listAuthorsObjOfPad(pid, function () {
+                                                    $.cUsers = this.data;
+                                                    $.fn3Time = setTimeout(fn3, 30000);
+                                                });
+                                            }
+
+                                            fn3();//更新在线人数
+                                            fn4();//测试拉取每个参与者的最后一个版本号.
+                                            fn2();//启动贡献值查询和行为图查询
+                                        });
+                                    }
+                                });
+                            }
+                            if (this.message == "ok") {
+                                $.session = this.data;
+                                //如果是管理员
+                                if ($.user.authority == 1) {
+                                    pad.getReadOnlyID(pid, function () {
+                                        if (this.code == 0) {
+                                            src = padDomainBasicURL + "/p/" + this.data.readOnlyID + "?userName=" + userName;
+                                            setCookie();
+                                        } else {
+                                            alert("获取文章url失败");
+                                        }
+                                    });
+                                } else {
+                                    src = padDomainBasicURL + "/p/" + pid + "?userName=" + userName;
+                                    setCookie();
+                                }
+
+                            } else {
+                                alert("session 创建失败");
+                            }
+                        });
+                    });
+                }
+            });
+            //COOKIE功能检查
+            (function fCheckCookie() {
+                if (!navigator.cookieEnabled) {
+                    alert("您好，您的浏览器设置禁止使用cookie\n请设置您的浏览器，启用cookie功能，再重新登录。");
+                }
+            })();
+            $.ajax({
+                url: "getInfo",
+                type: 'post',
+                dataType: "json",
+                complete: function (xhr) {
+                    if (xhr.status == 200) {
+                        var json = JSON.parse(xhr.responseText);
+                        if (json.status) {
+                            $("#name").html(json.user.name);
+                            $.user = json.user;
+                            $("body").trigger("load");
+                        } else {
+                            $.dialog({
+                                type: "message",
+                                message: "您还没有登陆，请登陆",
+                                callback: function () {
+                                    window.location.href = "index.html";
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        })
+    });
+</script>
+</body>
+</html>

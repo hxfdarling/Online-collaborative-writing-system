@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>帮助---在线协同写作系统</title>
+ <link rel="shortcut icon" href="img/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="css/formValidate.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <script src="js/seajs/sea.js" type="text/javascript"></script>
+    <script src="js/config/config-seajs.js" type="text/javascript"></script>
+
+</head>
+<body style="overflow: hidden;">
+<div class="head theme-background-color">
+    <div class="headName">帮助</div>
+    <div class="nav">
+        <a href="index.html" class="nav_item" target="home_window">主页</a>
+        <a href="about.html" class="nav_item" target="about_window">关于</a>
+    </div>
+</div>
+<div class="content">
+    <h1 style="text-align:center;">在线协同写作系统的帮助信息</h1>
+
+    <p style="padding:20px;  padding: 20px;  padding-right: 30px;  line-height: 2em;">
+        1.首页界面：登陆界面中直接输入你的账号与密码即可登陆系统；点击注册按钮会弹出注册账号，在注册账号界面输入正确的信息，邮箱将会成为你的登陆账号，注册完成后将会自动返回首页。<br>
+        2.组、文章与成员管理界面：这里可以添加、修改、删除组，文章，组成员，但是只有组管理员（也就是创建者）才拥有删除或修改操作。添加操作是所有人都有的权限。在修改或添加组信息的时候注意是否开启图表：默认是不开启图表模式的。<br>
+        3.编辑文章界面：第一次进入编辑状态（文章从为新建状态）时候，在编辑过程中如果图表没有出现请不要着急，将会在两分钟内自动刷新数据（这是出于性能考虑）。<br>
+    </p>
+</div>
+<div class="footer theme-background-color"></div>
+<script>
+    seajs.use([ "util/formValidate", "jquery" ,"util/util"], function (fv, $) {
+        window.onload = window.onresize = function () {
+            var height = (window.innerHeight || document.body.clientHeight)
+                    - $(".head").height() - $(".footer").height() - 20;
+            var content = $(".content");
+            content.css({
+                "height": height
+            });
+        }
+        $(function () {
+            $.getSystemInfo(function (si) {
+                $(".footer").text(si.copyright || "");
+            });
+        });
+    });
+</script>
+</body>
+</html>

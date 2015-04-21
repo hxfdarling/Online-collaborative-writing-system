@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>关于---在线协同写作系统</title>
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="css/formValidate.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <script src="js/seajs/sea.js" type="text/javascript"></script>
+    <script src="js/config/config-seajs.js" type="text/javascript"></script>
+
+</head>
+<body style="overflow: hidden;">
+<div class="head theme-background-color">
+    <div class="headName">关于在线协同写作系统</div>
+    <div class="nav">
+        <a href="index.html" class="nav_item" target="home_window">主页</a>
+        <a href="help.html" class="nav_item" target="help__window">帮助</a>
+    </div>
+</div>
+<div class="content">
+    <h1 style="text-align:center;">关于在线协同写作系统</h1>
+
+    <p style="padding:20px;  padding: 20px;  padding-right: 30px;  line-height: 2em;">
+
+    </p>
+</div>
+<div class="footer theme-background-color"></div>
+<script>
+    seajs.use([ "util/formValidate", "jquery" ,"util/util"], function (fv, $) {
+        window.onload = window.onresize = function () {
+            var height = (window.innerHeight || document.body.clientHeight)
+                    - $(".head").height() - $(".footer").height() - 20;
+            var content = $(".content");
+            content.css({
+                "height": height
+            });
+        }
+        $(function () {
+            $.getSystemInfo(function (si) {
+                $(".footer").text(si.copyright || "");
+            });
+        });
+    });
+</script>
+</body>
+</html>

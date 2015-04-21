@@ -1,0 +1,137 @@
+.gray-background {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #2b2b2b;
+	opacity: 0.4;
+	filter: alpha(opacity = 40);
+}
+
+.panel {
+	position: absolute;
+	border-radius: 10px;
+	border: solid 1px;
+	width: 250px;
+	height: 200px;
+	top: 0;
+	left: 0;
+	z-index: 999;
+	background-color: #ffffff;
+	overflow: hidden;
+}
+
+.panel .msg_head {
+	padding: 0 10% 0 10%;
+	width: 80%;
+	height: 26px;
+	position: static;
+	cursor: move;
+}
+
+.panel .msg_head .title {
+	float: left;
+	height: 26px;
+	line-height: 26px;
+	color: #ffffff
+}
+
+.panel .msg_head .close {
+	float: right;
+	height: 26px;
+	cursor: pointer;
+	font-size: 10px;
+	line-height: 26px;
+	color: red;
+}
+
+.panel .content {
+	text-align: center;
+	display: inline-block;
+	height: 174px;
+	color: #515151;
+	margin: 0 auto;
+	padding: 0;
+	overflow: auto;
+}
+
+.panel .content .tool-bar {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	background-color: #e6e6e6;
+	height: 40px;
+	width: 100%;
+	line-height: 40px;
+}
+
+.panel .btn {
+	padding: 5px 10px 5px 10px;
+	border-radius: 5px;
+	display: inline-block;
+	cursor: pointer;
+	color: #ffffff;
+	line-height: 1em;
+	height: 1em;
+	margin-left: 10px;
+}
+
+.panel .btn:hover {
+	background-color: #00e500;
+}
+
+.panel .cancel:hover {
+	background-color: gray;
+}
+
+#action {
+	height: auto;
+/* 	margin-top: 20px; */
+	float: left;
+	width: 500px;
+}
+
+#actionTB {
+	height: 20px;
+	width: 100%;
+}
+
+#actionTB .action-item {
+	height: 20px;
+	width: 20px;
+	border-radius: 20px;
+	display: inline-block;
+	margin-left: 30px;
+}
+
+#actionTB label {
+	line-height: 20px;
+	color: gray;
+}
+
+.speed-title {
+	color: gray;
+}
+
+#actionTB .action-item.add {
+	background-color: green;
+}
+
+#actionTB .action-item.replace {
+	background-color: blue;
+}
+
+#actionTB .action-item.remove {
+	background-color: red;
+}
+
+.msg_head {
+	text-align: center;
+	color: #ffffff;
+}
+
+.content {
+	z-index: 1;
+	overflow: hidden;
+}

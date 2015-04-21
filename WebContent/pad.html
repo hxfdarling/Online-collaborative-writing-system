@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>组、文与成员章管理---在线协同写作系统</title>
+ <link rel="shortcut icon" href="img/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="css/formValidate.css">
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <link type="text/css" rel="stylesheet" href="css/list.css">
+    <link type="text/css" rel="stylesheet" href="css/util.css">
+    <script src="js/seajs/sea.js" type="text/javascript"></script>
+    <script src="js/config/config-seajs.js" type="text/javascript"></script>
+</head>
+<body style="overflow: hidden;">
+<div class="head theme-background-color">
+    <div class="headName">组、文章与成员章管理</div>
+
+    <div class="nav">
+        <a class="nav_item" href="index.html" target="home_window">主页</a>
+        <a class="nav_item" href="help.html" target="help_window">帮助</a>
+        <a class="nav_item" href="about.html" target="about_window">关于</a>
+        <span class="username"></span>
+    </div>
+</div>
+<div class="content">
+    <div style="width: 981px; height: 100%;">
+        <!-- 			<div class="column" style="margin-right: 20px; width: 150px;"></div> -->
+        <div class="column">
+            <span class="column-title">组</span>
+
+            <div class="tool-bar">
+                <a class="btn theme-background-color theme-color" id="group_create">新建</a>
+                <a class="btn theme-background-color theme-color" id="group_update">修改</a>
+                <a class="btn theme-background-color theme-color" id="group_remove">删除</a>
+            </div>
+            <div class="column-content">
+                <table class="group list" style="margin-top: 10px;"></table>
+            </div>
+        </div>
+        <div class="column">
+            <span class="column-title">文章</span>
+
+            <div class="tool-bar">
+                <a class="btn theme-background-color theme-color" id="pad_create">新建</a>
+                <a class="btn theme-background-color theme-color" id="pad_update">编辑</a>
+                <a class="btn theme-background-color theme-color" id="pad_report">报表</a>
+                <a class="btn theme-background-color theme-color" id="pad_remove">删除</a>
+            </div>
+            <div class="column-content">
+                <table class="pad list" style="margin-top: 10px;"></table>
+            </div>
+        </div>
+        <div class="column">
+            <span class="column-title">组的成员</span>
+
+            <div class="tool-bar">
+                <a class="btn theme-background-color theme-color" id="user_create">添加</a>
+                <a class="btn theme-background-color theme-color" id="user_remove">删除</a>
+            </div>
+            <div class="column-content">
+                <table class="user list" style="margin-top: 10px;"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footer theme-background-color"></div>
+<script>
+seajs.use(
+        [ "util/formValidate", "jquery", "util/list",
+            "util/util", "pad", "model/api" ],
+        function (fv, $, list, util, pad, api) {
+            window.onload = window.onresize = function () {
+                window.name = "pad_window";
+                var height = (window.innerHeight || document.body.clientHeight)
+                        - $(".head").height()
+                        - $(".footer").height() - 20;
+                var content = $(".content");
+                content.css({
+                    "height": height
+                });
+
+                var columns = $(".column");
+                var _height = content.height() - 24;
+                columns.css({
+                    "height": _height
+                });
+                $(".column-content").css({
+                    "height": _height - 82
+                });
+            };
+            $(function () {
+                $.getSystemInfo(function (si) {
+                    $(".footer").text(si.copyright || "");
+                });
+                if (window.opener && window.opener["edit"]) {
+                    window.edit = window.opener.edit;
+                }
+                $("body").on("load", function () {
+                    $(".username").text("当前用户:" + $.user.name);
+                    //权限管理
+                    (function () {
+                        if ($.user.authority == 1) {
+                            $("#pad_update").text("查看");
+                        }
+                    })();
+                    $(".group").list({
+                        url: "getGroups",
+                        columns: [
+                            {
+                                field: "id",
+                                hidden: true
+                            },
+                            {
+                                field: "name",
+                                title: "组名"
+                            },
+                            {
+                                field: "createUesrName",
+                                title: "组创建者"
+                            }
+                        ],
+                        onSelect: function (rows, index, target) {
+                            api.getUsers(rows[index].groupId, function (json) {
+                                if (json.message == "ok") {
+                                    $(".user").list("reload", {     "rows": json.users     });
+                                }
+                            }, function () {
+                                alert("users get error");
+                            });
+                            pad.createGroupIfNotExistsFor(rows[index].groupId, function () {
+                                $.groupId = this.data.groupID;
+                                $.group = {
+                                    id: rows[index]["groupId"],
+                                    name:rows[index]["name"],
+                                    status: rows[index]["status"]
+                                };
+                                $.selectPad = null;
+                                $.selectUser = null;
+                                if (this.message == "ok") {
+                                    pad.listPads(this.data.groupID, function () {
+                                        if (this.message == "ok") {
+                                            $(".pad").list("reload", {
+                                                "rows": stringTOPad(this.data.padIDs)
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                    $(".pad").list({
+                        columns: [
+                            {
+                                field: "id",
+                                hidden: true
+                            },
+                            {
+                                field: "name",
+                                title: "文章名"
+                            }
+                        ],
+                        onSelect: function (rows, index, target) {
+                            $.selectPad = {
+                                row: rows[index]
+                            };
+                            var padID = encodeURI(rows[index].id
+                                    + "$"
+                                    + rows[index].name);
+                        }
+                    });
+                    $(".user").list({
+                        columns: [
+                            {
+                                field: "username",
+                                title: "账号"
+                            },
+                            {
+                                field: "name",
+                                title: "姓名"
+                            }
+                        ],
+                        onSelect: function (rows, index, target) {
+                            $.selectUser = rows[index];
+                        }
+                    })
+                });
+                function stringTOPad(padIDs) {
+                    var result = [], temp, t;
+                    for (var i = 0; i < padIDs.length; i++) {
+                        t = padIDs[i].split("$");
+                        temp = {};
+                        temp.id = t[0];
+                        temp.name = t[1];
+                        result[i] = temp;
+                    }
+                    return result;
+                }
+
+                $("#group_remove").click(function () {
+                    if ($.groupId) {
+                        var f = window.confirm("删除group时，隶属于他的所有pad都将被删除！你确定删除这个group么？");
+                        if (!f) {
+                            return;
+                        }
+                        pad.deleteGroup($.groupId, function () {
+                            api.deleteGroup($.group.id, function (json) {
+                                if (json.code == 0) {
+                                    $(".group").list("remove");
+                                    $.groupId = null;
+                                    $.selectPad = null
+                                    $.selectUser = null;
+                                    $(".pad").list("reload", []);
+                                }
+                                alert(json.message);
+                            })
+                        });
+                    } else {
+                        alert("not selected group!")
+                    }
+                });
+                var group_message, pad_message, user_message, group_update_message;
+                $("#group_create").click(function () {
+                    group_message = (group_message || $.dialog({
+                        title: "新建Group信息",
+                        type: "self",
+                        width: 250,
+                        height: 200,
+                        btn: {
+                            ok: function () {
+                                var user = $.user;
+                                var input = $(".ip", this);
+                                var text = input.val();
+                                if (text == null || text == "") {
+                                    alert("请输入Group名称");
+                                    return;
+                                } else if (text.length < 2) {
+                                    alert("Group名过短，请重新输入");
+                                    return;
+                                }
+                                var status = $(".status", this);
+                                status = status.val();
+                                input.val("");
+                                if (user) {
+                                    pad.createAuthorIfNotExistsFor(user.name, user.authorId, function () {
+                                        if (this.message == "ok") {
+                                            api.createGroup(text, status, function (json) {
+                                                if (json.status == 2) {
+                                                    alert("请勿重复添加");
+                                                } else if (json.status == 1) {
+                                                    alert("服务器错误，请稍后重试");
+                                                } else {
+                                                    alert("添加成功");
+                                                    $(".group").list("reload");
+                                                }
+                                            });
+
+                                        } else {
+                                            alert("etherpad 服务器超时");
+                                        }
+                                    });
+                                } else {
+                                    alert("未登录");
+                                }
+                                return true;
+                            },
+                            cancel: function () {
+
+                            }
+                        },
+                        content: "<div style='padding: 30px 10px '>" +
+                                "<label>Group名:</label><input class='ip' type='text' style='width: 128px;height: 20px;'><br>" +
+                                "<div style='margin-top: 10px;text-align: left;margin-left: 10px;'><label>开启图表:</label><select class='status' style='height: 25px;width: 130px;'  name='status'><option value='0'>是</option><option value='1'>否</option></select></div>" +
+                                "</div>",
+                        callback: function () {
+
+                        }
+                    }));
+                    group_message.dialog("show");
+                });
+                $("#group_update").click(function () {
+                    if ($.groupId) {
+                        group_update_message = (group_update_message || $.dialog({
+                            title: "修改Group信息",
+                            type: "self",
+                            width: 250,
+                            height: 200,
+                            btn: {
+                                ok: function () {
+                                    var user = $.user;
+                                    var input = $(".ip", this);
+                                    var text = input.val();
+                                    if (text == null || text == "") {
+                                        alert("请输入新的Group名称");
+                                        return;
+                                    } else if (text.length < 2) {
+                                        alert("Group名过短，请重新输入");
+                                        return;
+                                    }
+                                    input.val("");
+                                    var status = $(".status", this);
+                                    status = status.val();
+                                    var group = $.group;
+                                    api.updateGroupName(group.id, text, status, function (json) {
+                                        if (json.code == 0) {
+                                            $(".group").list("reload");
+                                            $.groupId = null;
+                                            $.selectPad = null
+                                            $.selectUser = null;
+                                        }
+                                        alert(json.message);
+                                    });
+
+                                    return true;
+                                },
+                                cancel: function () {
+
+                                }
+                            },
+                            content: "<div style='padding: 30px 10px '>" +
+                                    "<label>Group名:</label><input class='ip' type='text' style='width: 128px;height: 20px;'>" +
+                                    "<div style='margin-top: 10px;text-align: left;margin-left: 10px;'><label>开启图表:</label><select class='status' style='height: 25px;width: 130px;'  name='status'><option value='0'>是</option><option value='1'>否</option></select></div>" +
+                                    "</div>",
+                            callback: function () {
+
+                            }
+                        }));
+                        group_update_message.dialog("show");
+                    } else {
+                        alert("没有选择任何Group");
+                    }
+                });
+                $("#pad_create").click(function () {
+                    if ($.groupId) {
+                        pad_message = (pad_message || $.dialog({
+                            title: "输入pad信息",
+                            type: "self",
+                            width: 250,
+                            height: 150,
+                            btn: {
+                                ok: function () {
+                                    var user = $.user;
+                                    var input = $(".ip", this);
+                                    var text = input.val();
+                                    if (text == null || text == "") {
+                                        alert("请输入pad名称");
+                                        return;
+                                    } else if (text.length <2) {
+                                        alert("pad名称过短，请重新输入");
+                                        return;
+                                    }
+                                    input.val("");
+                                    if (user) {
+                                        pad.createGroupPad($.groupId, text, function () {
+                                            var json = this;
+                                            if (json.message == "groupID does not exist") {
+                                                alert("groupID does not exist");
+                                            } else {
+                                                pad.listPads($.groupId, function () {
+                                                    if (this.message == "ok") {
+                                                        $(".pad").list("reload", {"rows": stringTOPad(this.data.padIDs)});
+                                                        $.selectPad = null;
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    } else {
+                                        alert("未登录");
+                                    }
+                                    return true;
+                                },
+                                cancel: function () {
+
+                                }
+                            },
+                            content: "<div style='padding: 30px 10px '><label>名称:</label><input class='ip' type='text' style='width: 128px;height: 20px;margin-bottom: 10px;'></div>",
+                            callback: function () {
+
+                            }
+                        }));
+                        pad_message.dialog("show");
+                    } else {
+                        alert("请选择一个Group");
+                    }
+                });
+                $("#pad_update").click(function () {
+                    var rows = $(".user").data("rows");
+                    if ($.selectPad && rows) {
+                        window.users = rows;
+                        window.edit = {
+                            user: $.user,
+                            groupID: $.selectPad.row.id,
+                            name: $.selectPad.row.name,
+                            group: $.group
+                        };
+                        window.open("edit.html", "edit_window");
+                    } else {
+                        alert("选择编辑的pad");
+                    }
+                });
+
+                $("#pad_report").click(function () {
+                    var rows = $(".user").data("rows");
+                    if ($.selectPad && rows) {
+                        window.users = rows;
+                        window.edit = {
+                            user: $.user,
+                            groupID: $.selectPad.row.id,
+                            name: $.selectPad.row.name,
+                            group: $.group
+                        };
+                        window.open("report.html", "report_window");
+                    }
+                });
+
+
+                $("#pad_remove").click(function () {
+                    var group = $.group;
+                    if (!$.selectPad || !$.groupId) {
+                        alert("请选择要操作的pad");
+                        return;
+                    }
+                    var f = window.confirm("你确定删除这个pad么？");
+                    if (!f) {
+                        return;
+                    }
+                    if (group) {
+                        api.checkUserIsCreater(group.id, $.user.username, function (json) {
+                            if (json.code == 0 || $.user.authority == 1) {
+                                var pid = $.selectPad.row.id + "$" + $.selectPad.row.name;
+                                pad.deletePad(pid, function () {
+                                    if (this.code == 0) {
+                                        alert("pad删除成功");
+                                        $(".pad").list("remove",
+                                                function (rows, index) {
+                                                });
+                                    } else {
+                                        alert(this.message);
+                                    }
+                                });
+                            } else {
+                                alert("你没有删除pad的权限，只有创建Group的成员才有该权限！");
+                            }
+                        }, function () {
+
+                        })
+                    } else {
+                        alert("登录信息过期");
+                    }
+                });
+                $("#user_create").click(function () {
+                    if ($.groupId) {
+                        user_message = (user_message || $.dialog({
+                            title: "输入用户邮箱",
+                            type: "self",
+                            width: 250,
+                            height: 150,
+                            btn: {
+                                ok: function () {
+                                    var group = $.group;
+                                    var input = $(".ip", this);
+                                    var text = input
+                                            .val();
+                                    var reg = /^[a-zA-Z][\w|_|\d|\.]{0,}@[\w\\d]+\.[\w|\d|\.]+$/;
+                                    if (text == null
+                                            || text == "") {
+                                        alert("输入用户邮箱");
+                                        return;
+                                    } else if (text.length < 3
+                                            || !reg
+                                                    .test(text)) {
+                                        alert("请输入正确的邮箱");
+                                        return;
+                                    }
+                                    input.val("");
+                                    if (group) {
+                                        api.addUserToGroup(group.id, text, function (json) {
+                                            if (json.message == "ok") {
+                                                api.getUsers(group.id, function (json) {
+                                                    if (json.message == "ok") {
+                                                        $(".user").list("reload", {
+                                                            "rows": json.users
+                                                        });
+                                                    }
+                                                }, function () {
+                                                    alert("users get error");
+                                                });
+                                            } else {
+                                                alert(json.message);
+                                            }
+                                        }, function () {
+                                            alert("error");
+                                        });
+                                    } else {
+                                        alert("未登录");
+                                    }
+                                    return true;
+                                },
+                                cancel: function () {
+
+                                }
+                            },
+                            content: "<div style='padding: 30px 10px '><label>用户邮箱:</label><input class='ip'data-options='email,required' type='text' style='width: 128px;height: 20px;'></div>",
+                            callback: function () {
+
+                            }
+                        }));
+                        user_message.dialog("show");
+                        $(".username", user_message).validForm();
+                    } else {
+                        alert("请选择一个Group");
+                    }
+                });
+                $("#user_remove").click(function () {
+                    if ($.groupId) {
+                        var group = $.group, user = $.selectUser;
+                        if (group && user) {
+                            api.removeUserFromGroup(group.id, user.username,
+                                    function (json) {
+                                        if (json.message == "ok") {
+                                            api.getUsers(group.id, function (json) {
+                                                if (json.message == "ok") {
+                                                    $(".user").list("reload", {
+                                                        "rows": json.users
+                                                    });
+                                                }
+                                            }, function () {
+                                                alert("users get error");
+                                            });
+                                        } else {
+                                            alert(json.message);
+                                        }
+                                    },
+                                    function () {
+                                        alert("error");
+                                    });
+                        } else {
+                            alert("没有选择成员");
+                        }
+                    }
+                })
+                /***
+                 *获取用户信息
+                 */
+                $.ajax({
+                    url: "getInfo",
+                    type: 'post',
+                    dataType: "json",
+                    complete: function (xhr) {
+                        if (xhr.status == 200) {
+                            var json = JSON.parse(xhr.responseText);
+                            if (json.status) {
+                                $("#name").html(json.user.name);
+                                $.user = json.user;
+                                $("body").trigger("load");
+                            }
+                        }
+                    }
+                });
+            })
+        });
+</script>
+</body>
+</html>
