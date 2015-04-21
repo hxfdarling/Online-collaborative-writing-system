@@ -1,0 +1,5 @@
+# Online-collaborative-writing-system
+基于学习分析技术开发的在线协同写作系统
+系统数据库是MySQL数据库
+在spring配置文件中需要配置相应的数据库
+在运行该系统之前需要将Etherpad-online-collaborative-writing-system项目一并运行
